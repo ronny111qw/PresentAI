@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Currency, Loader2, RefreshCcw, MoreHorizontal } from "lucide-react";
+import { Loader2, RefreshCcw, MoreHorizontal } from "lucide-react";
 
 interface GiftIdea {
   name: string;
@@ -55,20 +55,20 @@ export default function Home() {
   const extractJSONFromText = (text: string): GiftIdea[] => {
     try {
       return JSON.parse(text);
-    } catch (e) {
+    } catch {
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         try {
           return JSON.parse(jsonMatch[0]);
-        } catch (e) {
-          console.error("Failed to parse extracted JSON:", e);
+        } catch (error) {
+          console.error("Failed to parse extracted JSON:", error);
         }
       }
-      
+  
       console.error("Failed to parse response as JSON, falling back to text processing");
-      
+  
       const sections = text.split(/(?=Gift \d:|^\d\.)/m).filter(Boolean);
-      
+  
       return sections.map((section) => {
         const lines = section.split('\n').filter(Boolean);
         return {
@@ -81,6 +81,7 @@ export default function Home() {
     }
   };
 
+  
   const fetchGiftIdeas = async (isShowMore: boolean = false) => {
     setLoading(true);
     setError('');
@@ -157,7 +158,7 @@ Format as JSON array:
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div>
-                    <span className="label-text text-lg font-sec">Recipient's name</span>
+                  <span className="label-text text-lg font-sec">Recipient&apos;s name</span>
                     <Input
                       placeholder="Recipient's Name"
                       value={name}
@@ -326,7 +327,7 @@ Format as JSON array:
                       <h3 className="font-bold text-lg mb-2">Gift Idea {index + 1}</h3>
                       <div className="space-y-2">
                         <p><strong>Gift:</strong> {idea.name}</p>
-                        <p><strong>Why it's appropriate:</strong> {idea.appropriateness}</p>
+                        <p><strong>Why it&apos;s appropriate:</strong> {idea.appropriateness}</p>
                         <p><strong>How it relates:</strong> {idea.relation}</p>
                         <p><strong>Price range:</strong> {idea.priceRange}</p>
                       </div>
