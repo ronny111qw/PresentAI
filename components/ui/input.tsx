@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 // Directly use React.InputHTMLAttributes<HTMLInputElement> as the props type
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type = "text", ...props }, ref) => { // Default type set to "text"
     return (
       <input
         type={type}
