@@ -1,101 +1,366 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from 'react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Currency, Loader2, RefreshCcw, MoreHorizontal } from "lucide-react";
+
+interface GiftIdea {
+  name: string;
+  appropriateness: string;
+  relation: string;
+  priceRange: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [relationship, setRelationship] = useState('');
+  const [hobbies, setHobbies] = useState('');
+  const [personality, setPersonality] = useState('');
+  const [budget, setBudget] = useState('');
+  const [occasion, setOccasion] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [customPersonality, setCustomPersonality] = useState('');
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [allGiftIdeas, setAllGiftIdeas] = useState<GiftIdea[]>([]);
+  const [showForm, setShowForm] = useState(true);
+  const [customRelationship, setCustomRelationship] = useState('');
+  const [customOccasion, setCustomOccasion] = useState('');
+  const [requestCount, setRequestCount] = useState(0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const resetForm = () => {
+    setName('');
+    setAge('');
+    setGender('');
+    setRelationship('');
+    setHobbies('');
+    setPersonality('');
+    setBudget('');
+    setOccasion('');
+    setCustomPersonality('');
+    setCustomRelationship('');
+    setCustomOccasion('');
+    setAllGiftIdeas([]);
+    setError('');
+    setShowForm(true);
+    setRequestCount(0);
+  };
+
+  const extractJSONFromText = (text: string): GiftIdea[] => {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        try {
+          return JSON.parse(jsonMatch[0]);
+        } catch (e) {
+          console.error("Failed to parse extracted JSON:", e);
+        }
+      }
+      
+      console.error("Failed to parse response as JSON, falling back to text processing");
+      
+      const sections = text.split(/(?=Gift \d:|^\d\.)/m).filter(Boolean);
+      
+      return sections.map((section) => {
+        const lines = section.split('\n').filter(Boolean);
+        return {
+          name: lines[0].replace(/^(Gift \d:|^\d\.)/, '').trim(),
+          appropriateness: lines[1] || "Not specified",
+          relation: lines[2] || "Not specified",
+          priceRange: lines[3] || "Price not specified",
+        };
+      });
+    }
+  };
+
+  const fetchGiftIdeas = async (isShowMore: boolean = false) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      const newRequestCount = requestCount + 1;
+      
+      // Create a list of previously suggested gifts
+      const previousGifts = allGiftIdeas.map(idea => idea.name.toLowerCase());
+      
+      const prompt = `Generate 5 unique and creative gift ideas for:
+Name: ${name}
+Age: ${age}
+Gender: ${gender}
+Relationship: ${relationship === 'Others' ? customRelationship : relationship}
+Hobbies: ${hobbies}
+Personality: ${personality === 'Others' ? customPersonality : personality}
+Budget: ${budget} ${currency}
+Occasion: ${occasion === 'Others' ? customOccasion : occasion}
+
+${isShowMore ? `This is request #${newRequestCount}. The following gifts have already been suggested, please provide completely different ideas:
+${previousGifts.join(', ')}` : ''}
+
+Format as JSON array:
+[
+  {
+    "name": "Gift name",
+    "appropriateness": "Why appropriate",
+    "relation": "How it relates",
+    "priceRange": "Price range within ${budget} ${currency}"
+  }
+]`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
+      
+      const newGiftIdeas = extractJSONFromText(text);
+      
+      // Filter out any potentially repeated gifts despite our prompt
+      const uniqueNewGiftIdeas = newGiftIdeas.filter(newIdea => 
+        !previousGifts.includes(newIdea.name.toLowerCase())
+      );
+      
+      setAllGiftIdeas(prevIdeas => [...prevIdeas, ...uniqueNewGiftIdeas]);
+      setShowForm(false);
+      setRequestCount(newRequestCount);
+    } catch (error) {
+      console.error("Error fetching gift ideas:", error);
+      setError('Failed to generate gift ideas. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-blue-100">
+      <div className="container mx-auto p-6">
+        <h1 className="mb-6 text-4xl font-bold text-center text-gray-800">Present AI 🎁</h1>
+        <Card className="w-full max-w-lg mx-auto">
+          <CardHeader>
+            <CardTitle className="text-center text-1xl font-semibold">
+              {showForm ? "Discover thoughtful gifts tailored to the recipient's personality, interests, and occasion." : "Gift Suggestions"}
+            </CardTitle>
+          </CardHeader>
+          <div className="text-center mb-4">
+            <div className="custom-line"></div>
+          </div>
+          <CardContent>
+            {showForm ? (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <span className="label-text text-lg font-sec">Recipient's name</span>
+                    <Input
+                      placeholder="Recipient's Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Age</span>
+                    <Input
+                      placeholder="Age"
+                      type="number"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Gender</span>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-md"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Relationship</span>
+                    <select
+                      value={relationship}
+                      onChange={(e) => setRelationship(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-md"
+                    >
+                      <option value="">Select Relationship</option>
+                      <option value="Friend">Friend</option>
+                      <option value="Sibling">Sibling</option>
+                      <option value="Parent">Parent</option>
+                      <option value="Partner">Partner</option>
+                      <option value="Colleague">Colleague</option>
+                      <option value="Others">Others</option>
+                    </select>
+                    {relationship === 'Others' && (
+                      <Input
+                        placeholder="Specify relationship"
+                        value={customRelationship}
+                        onChange={(e) => setCustomRelationship(e.target.value)}
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Hobbies</span>
+                    <Input
+                      placeholder="Hobbies (like painting, football)"
+                      value={hobbies}
+                      onChange={(e) => setHobbies(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Personality</span>
+                    <select
+                      value={personality}
+                      onChange={(e) => setPersonality(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-md"
+                    >
+                      <option value="">Select Personality</option>
+                      <option value="Cheerful">Cheerful</option>
+                      <option value="Introverted">Introverted</option>
+                      <option value="Adventurous">Adventurous</option>
+                      <option value="Creative">Creative</option>
+                      <option value="Others">Others</option>
+                    </select>
+                    
+                    {personality === 'Others' && (
+                      <Input
+                        placeholder="Specify personality"
+                        value={customPersonality}
+                        onChange={(e) => setCustomPersonality(e.target.value)}
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
+                
+                  <div>
+                    <span className="label-text text-lg font-sec">Budget</span>
+                    <div className="flex space-x-2">
+                      <Input
+                        placeholder="Budget"
+                        type="number"
+                        value={budget}
+                        onChange={(e) => setBudget(e.target.value)}
+                        className="flex-grow"
+                      />
+                      <select 
+                        value={currency} 
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="px-4 py-2 border rounded-md"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="INR">INR (₹)</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <span className="label-text text-lg font-sec">Occasion</span>
+                    <select
+                      value={occasion}
+                      onChange={(e) => setOccasion(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-md"
+                    >
+                      <option value="">Select Occasion</option>
+                      <option value="Birthday">Birthday</option>
+                      <option value="Anniversary">Anniversary</option>
+                      <option value="Christmas">Christmas</option>
+                      <option value="Graduation">Graduation</option>
+                      <option value="Others">Others</option>
+                    </select>
+                    {occasion === 'Others' && (
+                      <Input
+                        placeholder="Specify occasion"
+                        value={customOccasion}
+                        onChange={(e) => setCustomOccasion(e.target.value)}
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => fetchGiftIdeas(false)} 
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Finding Perfect Gifts...
+                    </>
+                  ) : (
+                    'Find Gift Ideas'
+                  )}
+                </Button>
+                
+                {error && (
+                  <div className="text-red-600 mt-2 text-center">
+                    {error}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  {allGiftIdeas.map((idea, index) => (
+                    <div key={index} className="mb-6 p-4 bg-white rounded-lg shadow">
+                      <h3 className="font-bold text-lg mb-2">Gift Idea {index + 1}</h3>
+                      <div className="space-y-2">
+                        <p><strong>Gift:</strong> {idea.name}</p>
+                        <p><strong>Why it's appropriate:</strong> {idea.appropriateness}</p>
+                        <p><strong>How it relates:</strong> {idea.relation}</p>
+                        <p><strong>Price range:</strong> {idea.priceRange}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex justify-between mt-4">
+                  <Button 
+                    onClick={() => fetchGiftIdeas(true)}
+                    variant="outline"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <MoreHorizontal className="mr-2 h-4 w-4" />
+                    )}
+                    Show More
+                  </Button>
+                  
+                  <Button 
+                    onClick={resetForm}
+                    variant="outline"
+                  >
+                    <RefreshCcw className="mr-2 h-4 w-4" />
+                    Start Over
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>  
+      </div>
     </div>
   );
 }
