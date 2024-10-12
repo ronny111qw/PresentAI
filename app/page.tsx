@@ -368,7 +368,7 @@ Format as JSON array:
           <p className="flex items-center">
             <span className="text-xl">🌐</span>
             <span className="ml-2 font-semibold text-sm sm:text-base">
-              Visit <a href="https://your-vercel-site-link.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">my Vercel Site</a>
+              Visit <a href="https://startup-names-by-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">my Vercel Site</a>
             </span>
           </p>
         </div>
