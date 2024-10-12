@@ -81,18 +81,16 @@ export default function Home() {
     }
   };
 
-  
   const fetchGiftIdeas = async (isShowMore: boolean = false) => {
     setLoading(true);
     setError('');
 
     try {
       const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const newRequestCount = requestCount + 1;
       
-      // Create a list of previously suggested gifts
       const previousGifts = allGiftIdeas.map(idea => idea.name.toLowerCase());
       
       const prompt = `Generate 5 unique and creative gift ideas for:
@@ -124,7 +122,6 @@ Format as JSON array:
       
       const newGiftIdeas = extractJSONFromText(text);
       
-      // Filter out any potentially repeated gifts despite our prompt
       const uniqueNewGiftIdeas = newGiftIdeas.filter(newIdea => 
         !previousGifts.includes(newIdea.name.toLowerCase())
       );
@@ -141,12 +138,12 @@ Format as JSON array:
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-100">
-      <div className="container mx-auto p-6">
-        <h1 className="mb-6 text-4xl font-bold text-center text-gray-800">Present AI 🎁</h1>
+    <div className="min-h-screen flex items-center justify-center bg-pink-100 p-4">
+      <div className="container mx-auto">
+        <h1 className="mb-6 text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800">Present AI 🎁</h1>
         <Card className="w-full max-w-lg mx-auto">
           <CardHeader>
-            <CardTitle className="text-center text-1xl font-semibold">
+            <CardTitle className="text-center text-lg sm:text-xl md:text-2xl font-semibold">
               {showForm ? "Discover thoughtful gifts tailored to the recipient's personality, interests, and occasion." : "Gift Suggestions"}
             </CardTitle>
           </CardHeader>
@@ -155,21 +152,21 @@ Format as JSON array:
           </div>
           <CardContent>
             {showForm ? (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="space-y-4">
                   <div>
-                  <span className="label-text text-lg font-sec">Recipient&apos;s name</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Recipient&apos;s name</span>
                     <Input
-                      placeholder="Recipient's Name"
+                      placeholder="E.g., Sarah Johnson"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Age</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Age</span>
                     <Input
-                      placeholder="Age"
+                      placeholder="E.g., 28"
                       type="number"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
@@ -177,11 +174,11 @@ Format as JSON array:
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Gender</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Gender</span>
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
+                      className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
                     >
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
@@ -192,11 +189,11 @@ Format as JSON array:
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Relationship</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Relationship</span>
                     <select
                       value={relationship}
                       onChange={(e) => setRelationship(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
+                      className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
                     >
                       <option value="">Select Relationship</option>
                       <option value="Friend">Friend</option>
@@ -217,20 +214,20 @@ Format as JSON array:
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Hobbies</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Hobbies</span>
                     <Input
-                      placeholder="Hobbies (like painting, football)"
+                      placeholder="E.g., painting, football, cooking, reading"
                       value={hobbies}
                       onChange={(e) => setHobbies(e.target.value)}
                     />
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Personality</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Personality</span>
                     <select
                       value={personality}
                       onChange={(e) => setPersonality(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
+                      className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
                     >
                       <option value="">Select Personality</option>
                       <option value="Cheerful">Cheerful</option>
@@ -251,10 +248,10 @@ Format as JSON array:
                   </div>
                 
                   <div>
-                    <span className="label-text text-lg font-sec">Budget</span>
-                    <div className="flex space-x-2">
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Budget</span>
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <Input
-                        placeholder="Budget"
+                        placeholder="E.g., 50, 100, 250"
                         type="number"
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
@@ -263,7 +260,7 @@ Format as JSON array:
                       <select 
                         value={currency} 
                         onChange={(e) => setCurrency(e.target.value)}
-                        className="px-4 py-2 border rounded-md"
+                        className="px-4 py-2 border rounded-md text-sm sm:text-base"
                       >
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
@@ -274,11 +271,11 @@ Format as JSON array:
                   </div>
                   
                   <div>
-                    <span className="label-text text-lg font-sec">Occasion</span>
+                    <span className="label-text text-sm sm:text-base md:text-lg font-sec">Occasion</span>
                     <select
                       value={occasion}
                       onChange={(e) => setOccasion(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
+                      className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
                     >
                       <option value="">Select Occasion</option>
                       <option value="Birthday">Birthday</option>
@@ -323,9 +320,9 @@ Format as JSON array:
               <div className="space-y-4">
                 <div>
                   {allGiftIdeas.map((idea, index) => (
-                    <div key={index} className="mb-6 p-4 bg-white rounded-lg shadow">
-                      <h3 className="font-bold text-lg mb-2">Gift Idea {index + 1}</h3>
-                      <div className="space-y-2">
+                    <div key={index} className="mb-4 p-4 bg-white rounded-lg shadow">
+                      <h3 className="font-bold text-base sm:text-lg mb-2">Gift Idea {index + 1}</h3>
+                      <div className="space-y-2 text-xs sm:text-sm md:text-base">
                         <p><strong>Gift:</strong> {idea.name}</p>
                         <p><strong>Why it&apos;s appropriate:</strong> {idea.appropriateness}</p>
                         <p><strong>How it relates:</strong> {idea.relation}</p>
@@ -335,11 +332,11 @@ Format as JSON array:
                   ))}
                 </div>
                 
-                <div className="flex justify-between mt-4">
+                <div className="flex flex-col sm:flex-row justify-between gap-2 mt-4">
                   <Button 
                     onClick={() => fetchGiftIdeas(true)}
-                    variant="outline"
                     disabled={loading}
+                    className="w-full sm:w-auto text-sm"
                   >
                     {loading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -351,7 +348,7 @@ Format as JSON array:
                   
                   <Button 
                     onClick={resetForm}
-                    variant="outline"
+                    className="w-full sm:w-auto text-sm"
                   >
                     <RefreshCcw className="mr-2 h-4 w-4" />
                     Start Over
@@ -361,6 +358,20 @@ Format as JSON array:
             )}
           </CardContent>
         </Card>  
+        <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 text-gray-800">
+          <p className="flex items-center">
+            <span className="text-xl">👨‍💻</span>
+            <span className="ml-2 font-semibold text-sm sm:text-base">
+              By <a href="https://www.instagram.com/37mohammd/?hl=en" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">37mohammd</a>
+            </span>
+          </p>
+          <p className="flex items-center">
+            <span className="text-xl">🌐</span>
+            <span className="ml-2 font-semibold text-sm sm:text-base">
+              Visit <a href="https://your-vercel-site-link.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">my Vercel Site</a>
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
