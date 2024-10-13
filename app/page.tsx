@@ -358,21 +358,29 @@ Format as JSON array:
             )}
           </CardContent>
         </Card>  
-        <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 text-gray-800">
+        <div className="mt-6 w-full flex justify-center">
+        <div className="flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-gray-800 w-full max-w-2xl">
           <p className="flex items-center">
             <span className="text-xl">👨‍💻</span>
-            <span className="ml-2 font-semibold text-sm sm:text-base">
+            <span className="ml-2 font-semibold text-sm md:text-base">
               By <a href="https://www.instagram.com/37mohammd/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">37mohammd</a>
             </span>
           </p>
           <p className="flex items-center">
             <span className="text-xl">🌐</span>
-            <span className="ml-2 font-semibold text-sm sm:text-base">
-              Visit <a href="https://startup-names-by-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">my Vercel Site</a>
+            <span className="ml-2 font-semibold text-sm md:text-base">
+              Visit <a href="https://name-my-startup-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Find Your Startup Name</a>
+            </span>
+          </p>
+          <p className="flex items-center">
+            
+            <span className="ml-2 font-semibold text-sm md:text-base">
+              Github <a href="https://github.com/ronny111qw" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ronny111qw</a>
             </span>
           </p>
         </div>
       </div>
     </div>
-  );
+    </div>
+  )
 }
